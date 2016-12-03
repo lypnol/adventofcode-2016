@@ -99,7 +99,7 @@ def run_submissions_for_contest(contest_path):
                 answer, author = _run_submission(submission, input)
                 time_after = datetime.datetime.now()
                 msecs = (time_after - time_before).total_seconds() * 1000
-                print("\t\t {green}{author}{end} says the response is {blue}{answer}{end} on input from {yellow}{input}{end} in {msecs}ms"
+                print("\t\t {green}{author}{end} says the response is {blue}{answer}{end} on input from {yellow}{input}{end} in {msecs} ms"
                 .format(green=bcolors.GREEN, author=author, end=bcolors.ENDC, blue=bcolors.BLUE, answer=answer, input=in_author, yellow=bcolors.YELLOW, msecs=msecs)
                 )
 
