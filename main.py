@@ -115,8 +115,6 @@ def run_submissions_for_day(day, day_path):
     for contest_path in contest_paths:
         run_submissions_for_contest(contest_path)
 
-    print("\n")
-
 def run_submissions():
     for day_path in _get_days():
         day = day_path[4:]
