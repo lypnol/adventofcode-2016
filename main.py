@@ -1,6 +1,7 @@
 import glob
 from os.path import splitext, basename
 from os import walk
+import sys
 import imp
 import inspect
 from submission import Submission
@@ -8,6 +9,12 @@ from submission import Submission
 
 DAY_PATH_PATTERN  = 'day-[0-9]*'
 CONTEST_PATH_PATTERN = 'part-[0-9]*'
+
+class DifferentAnswersException(Exception):
+    def __init__(self, value):
+        self.value = value
+    def __str__(self):
+        return repr(self.value)
 
 def _context_name(context_path):
     return context_path.replace('/','_').replace('-','_')
@@ -65,16 +72,28 @@ def get_inputs_for_contest(contest_path):
 
 def _run_submission(submission_class, input):
     submission = submission_class()
-    return submission.run(input)
+    return submission.run(input), submission.author()
 
 def run_submissions_for_contest(contest_path):
     print("* contest %s:" % basename(contest_path))
     submissions = load_submissions_for_contest(contest_path)
     inputs = get_inputs_for_contest(contest_path)
 
-    for input in inputs:
-        for submission in submissions:
-            answer = _run_submission(submission, input)
+    try:
+        for input in inputs:
+            prev_ans = None
+            for submission in submissions:
+                answer, author = _run_submission(submission, input)
+                print("%s says the response is %s" % (author, answer))
+
+                if prev_ans != None and prev_ans != answer:
+                    raise DifferentAnswersException("we don't agree for %s" % contest_path)
+
+                prev_ans = answer
+    except DifferentAnswersException as e:
+        print e
+        sys.exit(1)
+
 
 def run_submissions_for_day(day, day_path):
     print("running submissions for day %s:" % day)
