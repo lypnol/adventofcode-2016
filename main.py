@@ -78,7 +78,7 @@ def get_inputs_for_contest(contest_path):
     # TODO : check if contest_path/inputs exists
     for input_file in glob.glob(contest_path + '/inputs/*.txt'):
         with open(input_file, 'r') as content_file:
-            inputs.append(content_file.read())
+            inputs.append((input_file.split('.')[-2].split('/')[-1],content_file.read()))
     return inputs
 
 def _run_submission(submission_class, input):
@@ -91,11 +91,11 @@ def run_submissions_for_contest(contest_path):
     inputs = get_inputs_for_contest(contest_path)
 
     try:
-        for input in inputs:
+        for in_author,input in inputs:
             prev_ans = None
             for submission in submissions:
                 answer, author = _run_submission(submission, input)
-                print("\t\t"+bcolors.GREEN+" %s " % author + bcolors.ENDC + " says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC)
+                print("\t\t"+bcolors.GREEN+" %s " % author + bcolors.ENDC + "says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC + "on input from "+bcolors.YELLOW+"%s" % in_author.title() + bcolors.ENDC)
 
                 if prev_ans != None and prev_ans != answer:
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
