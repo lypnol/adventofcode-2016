@@ -1,3 +1,3 @@
-# Advent of code 2016 solutions
+# Advent of code 2016 submissions
 
-These are proposed solutions for http://adventofcode.com/2016.
+These are proposed submissions for http://adventofcode.com/2016.
