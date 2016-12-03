@@ -14,7 +14,7 @@ class AyoubSubmission(Submission):
 
         code = ''
         i, j = 1, 1   #starting position
-        for line in s.split('\n'):
+        for line in s.rstrip().split('\n'):
             for c in line:
                 if c == 'U' and i > 0:
                     i -= 1

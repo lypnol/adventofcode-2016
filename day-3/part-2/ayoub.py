@@ -11,7 +11,7 @@ class AyoubSubmission(Submission):
 
         valid = 0
         read_lines = []
-        for line in s.split('\n'):
+        for line in s.rstrip().split('\n'):
             a, b, c = list(map(int, line.split()))
             read_lines += [[a, b, c]]
             if len(read_lines) == 3:
