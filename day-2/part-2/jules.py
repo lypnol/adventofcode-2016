@@ -1,6 +1,6 @@
 from submission import Submission
 
-class AyoubSubmission(Submission):
+class JulesSubmission(Submission):
 
     def author(self):
         return 'Jules'
@@ -21,7 +21,7 @@ class AyoubSubmission(Submission):
 		move = {"R" : (1,0), "L": (-1,0), "U" : (0,1), "D" : (0,-1)}
 		current = (-2,0)
 		positions = ""
-		for line in s.rstrip().split('\n'):		
+		for line in s.rstrip().split('\n'):
 			for instruction in line.strip():
 				newCurrent = (current[0]+move[instruction][0],current[1]+move[instruction][1])
 				if abs(newCurrent[0]) + abs(newCurrent[1]) <= 2:

@@ -1,6 +1,6 @@
 from submission import Submission
 
-class AyoubSubmission(Submission):
+class JulesSubmission(Submission):
 
     def author(self):
         return 'Jules'
@@ -15,4 +15,3 @@ class AyoubSubmission(Submission):
 				current = (new[0] if new[0] in range(0,3) else current[0] , new[1] if new[1] in range(0,3) else current[1])
 			sol += str(1+current[0]+(2-current[1])*3)
 		return sol
-	

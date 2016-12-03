@@ -1,6 +1,6 @@
 from submission import Submission
 
-class AyoubSubmission(Submission):
+class JulesSubmission(Submission):
 
     def author(self):
         return 'Jules'
