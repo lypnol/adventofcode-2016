@@ -91,16 +91,17 @@ def run_submissions_for_contest(contest_path):
     inputs = get_inputs_for_contest(contest_path)
 
     try:
-        for input in inputs:
+        for index_input, input in enumerate(inputs):
             prev_ans = None
             for submission in submissions:
                 answer, author = _run_submission(submission, input)
-                print("\t\t"+bcolors.GREEN+" %s " % author + bcolors.ENDC + " says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC)
+                print("\t\t[Test #" + str(index_input) + "] "+bcolors.GREEN+" %s " % author + bcolors.ENDC + " says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC)
 
                 if prev_ans != None and prev_ans != answer:
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
 
                 prev_ans = answer
+            print("\n")
     except DifferentAnswersException as e:
         print e
         sys.exit(1)
@@ -113,8 +114,6 @@ def run_submissions_for_day(day, day_path):
     contest_paths = _get_contests_path_for_day(day_path)
     for contest_path in contest_paths:
         run_submissions_for_contest(contest_path)
-
-    print("\n")
 
 def run_submissions():
     for day_path in _get_days():
