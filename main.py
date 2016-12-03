@@ -101,7 +101,7 @@ def run_submissions_for_contest(contest_path):
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
 
                 prev_ans = answer
-                print("\n")
+            print("\n")
     except DifferentAnswersException as e:
         print e
         sys.exit(1)
