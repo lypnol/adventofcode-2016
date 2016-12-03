@@ -6,6 +6,17 @@ import imp
 import inspect
 from submission import Submission
 
+#To print colors in terminal
+class bcolors:
+    RED = '\033[91m'
+    GREEN = '\033[92m'
+    YELLOW = '\033[93m'
+    BLUE = '\033[94m'
+    MAGENTA = '\033[95m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
 
 DAY_PATH_PATTERN  = 'day-[0-9]*'
 CONTEST_PATH_PATTERN = 'part-[0-9]*'
@@ -75,7 +86,7 @@ def _run_submission(submission_class, input):
     return submission.run(input), submission.author()
 
 def run_submissions_for_contest(contest_path):
-    print("* contest %s:" % basename(contest_path))
+    print(bcolors.BOLD + "\t* contest %s:" % basename(contest_path) + bcolors.ENDC)
     submissions = load_submissions_for_contest(contest_path)
     inputs = get_inputs_for_contest(contest_path)
 
@@ -84,10 +95,10 @@ def run_submissions_for_contest(contest_path):
             prev_ans = None
             for submission in submissions:
                 answer, author = _run_submission(submission, input)
-                print("%s says the response is %s" % (author, answer))
+                print("\t\t"+bcolors.GREEN+" %s " % author + bcolors.ENDC + " says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC)
 
                 if prev_ans != None and prev_ans != answer:
-                    raise DifferentAnswersException("we don't agree for %s" % contest_path)
+                    raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
 
                 prev_ans = answer
     except DifferentAnswersException as e:
@@ -96,7 +107,8 @@ def run_submissions_for_contest(contest_path):
 
 
 def run_submissions_for_day(day, day_path):
-    print("running submissions for day %s:" % day)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print(bcolors.RED + bcolors.BOLD + "running submissions for day %s:" % day +bcolors.ENDC)
 
     contest_paths = _get_contests_path_for_day(day_path)
     for contest_path in contest_paths:
