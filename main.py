@@ -5,6 +5,7 @@ import sys
 import imp
 import inspect
 from submission import Submission
+import datetime
 
 #To print colors in terminal
 class bcolors:
@@ -91,11 +92,17 @@ def run_submissions_for_contest(contest_path):
     inputs = get_inputs_for_contest(contest_path)
 
     try:
-        for in_author,input in inputs:
+        for in_author, input in inputs:
             prev_ans = None
             for submission in submissions:
+                time_before = datetime.datetime.now()
                 answer, author = _run_submission(submission, input)
-                print("\t\t"+bcolors.GREEN+" %s " % author + bcolors.ENDC + "says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC + " on input from "+bcolors.YELLOW+"%s" % in_author.title() + bcolors.ENDC)
+                time_after = datetime.datetime.now()
+                msecs = (time_after - time_before).total_seconds() * 1000
+                print("\t\t {green}{author}{end} says the response is {blue}{answer}{end} on input from {yellow}{input}{end} in {msecs} ms"
+                .format(green=bcolors.GREEN, author=author, end=bcolors.ENDC, blue=bcolors.BLUE, answer=answer, input=in_author.title(), yellow=bcolors.YELLOW, msecs=msecs)
+                )
+
 
                 if prev_ans != None and prev_ans != answer:
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
