@@ -95,7 +95,7 @@ def run_submissions_for_contest(contest_path):
             prev_ans = None
             for submission in submissions:
                 answer, author = _run_submission(submission, input)
-                print("[Test #" + str(index_input) + "]\t\t"+bcolors.GREEN+" %s " % author + bcolors.ENDC + " says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC)
+                print("\t\t[Test #" + str(index_input) + "] "+bcolors.GREEN+" %s " % author + bcolors.ENDC + " says the response is "+bcolors.BLUE+"%s" % answer + bcolors.ENDC)
 
                 if prev_ans != None and prev_ans != answer:
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
