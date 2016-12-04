@@ -71,7 +71,8 @@ def load_submissions_for_contest(contest_path):
         submission = _load_submission(contest_path, submission_file)
 
         # TODO : check if submission is None
-        submissions.append(submission)
+        if submission is not None:
+            submissions.append(submission)
     return submissions
 
 def get_inputs_for_contest(contest_path):
