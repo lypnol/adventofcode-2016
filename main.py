@@ -6,6 +6,7 @@ from os import walk
 from submission import Submission
 
 show_debug = False
+filter_author = None
 
 #To print colors in terminal
 class bcolors:
@@ -83,8 +84,7 @@ def get_inputs_for_contest(contest_path):
             inputs.append((input_file.split('.')[-2].split('/')[-1],content_file.read()))
     return inputs
 
-def _run_submission(submission_class, input):
-    submission = submission_class()
+def _run_submission(submission, input):
     result, author = submission.run(input), submission.author()
     if show_debug:
         if len(submission.get_debug_stack()) > 0:
@@ -105,7 +105,10 @@ def run_submissions_for_contest(contest_path):
             prev_ans = None
             for submission in submissions:
                 time_before = datetime.datetime.now()
-                answer, author = _run_submission(submission, input)
+                submission_obj = submission()
+                if filter_author is not None and submission_obj.author() != filter_author:
+                    continue
+                answer, author = _run_submission(submission_obj, input)
                 time_after = datetime.datetime.now()
                 msecs = (time_after - time_before).total_seconds() * 1000
                 print("\t\t {green}{author}{end} says the response is {blue}{answer}{end} on input from {yellow}{input}{end} in {msecs} ms"
@@ -140,11 +143,12 @@ def run_submissions():
 
 def main(argv):
     global show_debug
+    global filter_author
     day = None
     part = None
     smartDetection = False
     try:
-        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug"])
+        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug", "author="])
     except getopt.GetoptError:
         print 'main.py -d <day-number> -c <contest-number>'
         sys.exit(2)
@@ -161,6 +165,8 @@ def main(argv):
             show_debug = True
         elif opt == '--no-debug':
             show_debug = False
+        elif opt in ["-a", "--author"]:
+            filter_author = arg
 
     if not (part is None) and day is None:
         print "You cannot specify a part without a day"
