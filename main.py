@@ -1,11 +1,11 @@
-import glob
+# python libs
+import glob, sys, getopt, imp, inspect, datetime, re
 from os.path import splitext, basename
 from os import walk
-import sys
-import imp
-import inspect
+
 from submission import Submission
-import datetime
+
+show_debug = False
 
 #To print colors in terminal
 class bcolors:
@@ -84,7 +84,15 @@ def get_inputs_for_contest(contest_path):
 
 def _run_submission(submission_class, input):
     submission = submission_class()
-    return submission.run(input), submission.author()
+    result, author = submission.run(input), submission.author()
+    if show_debug:
+        if len(submission.get_debug_stack()) > 0:
+            print("Debug trace for %s " % submission_class)
+            stack = submission.get_debug_stack()
+            print('\n'.join(submission.get_debug_stack()[:15]))
+            if len(stack) > 15:
+                print('and %s other lines...' % (len(stack) - 15))
+    return result, author
 
 def run_submissions_for_contest(contest_path):
     print(bcolors.BOLD + "\t* contest %s:" % basename(contest_path) + bcolors.ENDC)
@@ -129,15 +137,45 @@ def run_submissions():
         run_submissions_for_day(day, day_path)
 
 
+def main(argv):
+    global show_debug
+    day = None
+    part = None
+    smartDetection = False
+    try:
+        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug"])
+    except getopt.GetoptError:
+        print 'main.py -d <day-number> -c <contest-number>'
+        sys.exit(2)
 
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'main.py -d <day-number> -c <contest-number>'
+            sys.exit()
+        elif opt in ("-d", "--day"):
+            day = arg
+        elif opt in ("-p", "--part"):
+            part = arg
+        elif opt == '--debug':
+            show_debug = True
+        elif opt == '--no-debug':
+            show_debug = False
 
+    if not (part is None) and day is None:
+        print "You cannot specify a part without a day"
+        sys.exit(2)
 
+    if day == None and part == None:
+        # Full test
+        run_submissions()
+        return
 
+    if part == None:
+        run_submissions_for_day(day, 'day-%s' % day)
+        return
 
+    run_submissions_for_contest('day-{day}/part-{part}'.format(day=day, part=part))
+    return
 
-
-
-
-
-
-print(run_submissions())
+if __name__ == "__main__":
+   main(sys.argv[1:])
