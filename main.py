@@ -1,11 +1,9 @@
-import glob
+# python libs
+import glob, sys, getopt, imp, inspect, datetime, re
 from os.path import splitext, basename
 from os import walk
-import sys
-import imp
-import inspect
+
 from submission import Submission
-import datetime
 
 #To print colors in terminal
 class bcolors:
@@ -129,15 +127,40 @@ def run_submissions():
         run_submissions_for_day(day, day_path)
 
 
+def main(argv):
+    day = None
+    part = None
+    smartDetection = False
+    try:
+        opts, args = getopt.getopt(argv,"hd:p:",["day=","part="])
+    except getopt.GetoptError:
+        print 'main.py -d <day-number> -c <contest-number>'
+        sys.exit(2)
 
+    for opt, arg in opts:
+        if opt == '-h':
+            print 'main.py -d <day-number> -c <contest-number>'
+            sys.exit()
+        elif opt in ("-d", "--day"):
+            day = arg
+        elif opt in ("-p", "--part"):
+            part = arg
 
+    if not (part is None) and day is None:
+        print "You cannot specify a part without a day"
+        sys.exit(2)
 
+    if day == None and part == None:
+        # Full test
+        run_submissions()
+        return
 
+    if part == None:
+        run_submissions_for_day(day, 'day-%s' % day)
+        return
 
+    run_submissions_for_contest('day-{day}/part-{part}'.format(day=day, part=part))
+    return
 
-
-
-
-
-
-print(run_submissions())
+if __name__ == "__main__":
+   main(sys.argv[1:])
