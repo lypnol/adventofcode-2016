@@ -13,7 +13,7 @@ class JulesSubmission(Submission):
         for word in s:
             for c in word:
                 newLine += charset[(charset.index(c)+int(id))%len(charset)]
-                if newLine != wanted[len(newLine)]:
+                if newLine != wanted[:len(newLine)]:
                     return False
             newLine += " "
         return True
