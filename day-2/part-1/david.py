@@ -27,4 +27,4 @@ class DavidSubmission(Submission):
             button = self.follow_instructions(button, instructions_line)
             answer += str(button)
 
-        return ''.join(answer)
+        return answer

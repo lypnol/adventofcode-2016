@@ -104,10 +104,10 @@ def run_submissions_for_contest(contest_path):
                 )
 
 
-                if prev_ans != None and prev_ans != answer:
+                if prev_ans != None and prev_ans != str(answer):
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
 
-                prev_ans = answer
+                prev_ans = str(answer)
     except DifferentAnswersException as e:
         print e
         sys.exit(1)
