@@ -5,6 +5,8 @@ from os import walk
 
 from submission import Submission
 
+show_debug = False
+
 #To print colors in terminal
 class bcolors:
     RED = '\033[91m'
@@ -82,7 +84,15 @@ def get_inputs_for_contest(contest_path):
 
 def _run_submission(submission_class, input):
     submission = submission_class()
-    return submission.run(input), submission.author()
+    result, author = submission.run(input), submission.author()
+    if show_debug:
+        if len(submission.get_debug_stack()) > 0:
+            print("Debug trace for %s " % submission_class)
+            stack = submission.get_debug_stack()
+            print('\n'.join(submission.get_debug_stack()[:15]))
+            if len(stack) > 15:
+                print('and %s other lines...' % (len(stack) - 15))
+    return result, author
 
 def run_submissions_for_contest(contest_path):
     print(bcolors.BOLD + "\t* contest %s:" % basename(contest_path) + bcolors.ENDC)
@@ -128,11 +138,12 @@ def run_submissions():
 
 
 def main(argv):
+    global show_debug
     day = None
     part = None
     smartDetection = False
     try:
-        opts, args = getopt.getopt(argv,"hd:p:",["day=","part="])
+        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug"])
     except getopt.GetoptError:
         print 'main.py -d <day-number> -c <contest-number>'
         sys.exit(2)
@@ -145,6 +156,10 @@ def main(argv):
             day = arg
         elif opt in ("-p", "--part"):
             part = arg
+        elif opt == '--debug':
+            show_debug = True
+        elif opt == '--no-debug':
+            show_debug = False
 
     if not (part is None) and day is None:
         print "You cannot specify a part without a day"
