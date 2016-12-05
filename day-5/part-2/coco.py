@@ -18,9 +18,9 @@ class CocoDay5Part1(Submission):
             self.debug(index)
             position = digest[5]
             letter = digest[6]
-            print(digest)
+            self.debug(digest)
             if position not in code and position in map(str, [0,1,2,3,4,5,6,7]):
                 code[position] = letter
-                print(code)
+                self.debug(code)
             digest = ""
         return "".join(code[str(i)] for i in range(8))
