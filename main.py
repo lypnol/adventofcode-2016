@@ -88,7 +88,7 @@ def _run_submission(submission, input):
     result, author = submission.run(input), submission.author()
     if show_debug:
         if len(submission.get_debug_stack()) > 0:
-            print("Debug trace for %s " % submission_class)
+            print("Debug trace for %s " % author)
             stack = submission.get_debug_stack()
             print('\n'.join(submission.get_debug_stack()[:15]))
             if len(stack) > 15:
