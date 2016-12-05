@@ -96,7 +96,7 @@ def _run_submission(submission, input):
     return result, author
 
 def run_submissions_for_contest(contest_path):
-    print(bcolors.BOLD + "\t* contest %s:" % basename(contest_path) + bcolors.ENDC)
+    print("\n" + bcolors.MAGENTA + bcolors.BOLD + "* contest %s:" % basename(contest_path) + bcolors.ENDC)
     submissions = load_submissions_for_contest(contest_path)
     inputs = get_inputs_for_contest(contest_path)
 
