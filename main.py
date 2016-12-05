@@ -117,7 +117,7 @@ def run_submissions_for_contest(contest_path):
             for submission in submissions:
                 time_before = datetime.datetime.now()
                 submission_obj = submission()
-                if filter_author is not None and submission_obj.author() != filter_author:
+                if filter_author is not None and submission_obj.author().lower() != filter_author.lower():
                     continue
                 answer, author = _run_submission(submission_obj, input)
                 time_after = datetime.datetime.now()
