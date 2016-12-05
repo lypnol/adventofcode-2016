@@ -103,6 +103,13 @@ def run_submissions_for_contest(contest_path):
     try:
         for in_author, input in inputs:
             prev_ans = None
+            answers = []
+            print("---------------------------------------------------")
+            print("On input from {yellow}{input}{end}".format(
+                yellow=bcolors.YELLOW,
+                end=bcolors.ENDC,
+                input=in_author.title()))
+            print("---------------------------------------------------")
             for submission in submissions:
                 time_before = datetime.datetime.now()
                 submission_obj = submission()
@@ -111,10 +118,15 @@ def run_submissions_for_contest(contest_path):
                 answer, author = _run_submission(submission_obj, input)
                 time_after = datetime.datetime.now()
                 msecs = (time_after - time_before).total_seconds() * 1000
-                print("\t\t {green}{author}{end} says the response is {blue}{answer}{end} on input from {yellow}{input}{end} in {msecs} ms"
-                .format(green=bcolors.GREEN, author=author, end=bcolors.ENDC, blue=bcolors.BLUE, answer=answer, input=in_author.title(), yellow=bcolors.YELLOW, msecs=msecs)
-                )
-
+                print("{green}{author}{end}\t | {blue}{answer}{end} \t | {msecs} ms".format(
+                    green=bcolors.GREEN,
+                    author=author,
+                    end=bcolors.ENDC,
+                    blue=bcolors.BLUE,
+                    answer=answer,
+                    input=in_author.title(),
+                    yellow=bcolors.YELLOW,
+                    msecs=msecs))
 
                 if prev_ans != None and prev_ans != str(answer):
                     raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
