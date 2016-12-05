@@ -5,7 +5,7 @@ from submission import Submission
 class CocoDay4Part1(Submission):
 
     def author(self):
-        return"coco"
+        return "coco"
 
     def run(self, instructions):
         regex = "(.*)-([0-9]*)\[([a-z]*)\]"
