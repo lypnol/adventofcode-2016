@@ -124,7 +124,7 @@ def run_submissions_for_contest(contest_path):
                 msecs = (time_after - time_before).total_seconds() * 1000
                 print("{green}{author}{end}\t | {blue}{answer}{end} \t | {msecs} ms".format(
                     green=bcolors.GREEN,
-                    author=author,
+                    author=author.title(),
                     end=bcolors.ENDC,
                     blue=bcolors.BLUE,
                     answer=answer,
