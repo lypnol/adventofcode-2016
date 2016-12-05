@@ -41,6 +41,10 @@ def _get_days():
 def _get_contests_path_for_day(day_path):
     return glob.glob(day_path + '/' + CONTEST_PATH_PATTERN)
 
+# Return contest number from path
+def _get_constest_number(contest_path):
+    return contest_path.split('-')[-1]
+
 # Returns the lists of possible submission files for the given contest
 def _find_submissions_for_contest(contest_path):
     submission_files = []
@@ -137,13 +141,16 @@ def run_submissions_for_contest(contest_path):
         sys.exit(1)
 
 
-def run_submissions_for_day(day, day_path):
+def run_submissions_for_day(day, day_path, contestFilter=None):
     print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     print(bcolors.RED + bcolors.BOLD + "running submissions for day %s:" % day +bcolors.ENDC)
 
     contest_paths = _get_contests_path_for_day(day_path)
     for contest_path in contest_paths:
-        run_submissions_for_contest(contest_path)
+        if contestFilter != None and _get_constest_number(contest_path) == contestFilter:
+            run_submissions_for_contest(contest_path)
+        elif contestFilter == None:
+            run_submissions_for_contest(contest_path)
 
     print("\n")
 
@@ -160,7 +167,7 @@ def main(argv):
     part = None
     smartDetection = False
     try:
-        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug", "author="])
+        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug", "author=", 'last'])
     except getopt.GetoptError:
         print 'main.py -d <day-number> -c <contest-number>'
         sys.exit(2)
@@ -173,6 +180,8 @@ def main(argv):
             day = arg
         elif opt in ("-p", "--part"):
             part = arg
+        elif opt == '--last':
+            day = _get_days()[-1][4:]
         elif opt == '--debug':
             show_debug = True
         elif opt == '--no-debug':
@@ -181,8 +190,10 @@ def main(argv):
             filter_author = arg
 
     if not (part is None) and day is None:
-        print "You cannot specify a part without a day"
-        sys.exit(2)
+        for day_path in _get_days():
+            day = day_path[4:]
+            run_submissions_for_day(day, day_path, part)
+        return
 
     if day == None and part == None:
         # Full test
@@ -193,7 +204,7 @@ def main(argv):
         run_submissions_for_day(day, 'day-%s' % day)
         return
 
-    run_submissions_for_contest('day-{day}/part-{part}'.format(day=day, part=part))
+    run_submissions_for_day(day,'day-%s' % day, part)
     return
 
 if __name__ == "__main__":
