@@ -100,7 +100,7 @@ def _run_submission(submission, input):
     return result, author
 
 def run_submissions_for_contest(contest_path):
-    print("\n" + bcolors.MAGENTA + bcolors.BOLD + "* contest %s:" % basename(contest_path) + bcolors.ENDC)
+    print("\n\t" + bcolors.MAGENTA + bcolors.BOLD + "* contest %s:" % basename(contest_path) + bcolors.ENDC)
     submissions = load_submissions_for_contest(contest_path)
     inputs = get_inputs_for_contest(contest_path)
 
@@ -108,12 +108,12 @@ def run_submissions_for_contest(contest_path):
         for in_author, input in inputs:
             prev_ans = None
             answers = []
-            print("---------------------------------------------------")
-            print("On input from {yellow}{input}{end}".format(
+            print("\t---------------------------------------------------")
+            print("\tOn input from {yellow}{input}{end}".format(
                 yellow=bcolors.YELLOW,
                 end=bcolors.ENDC,
                 input=in_author.title()))
-            print("---------------------------------------------------")
+            print("\t---------------------------------------------------")
             for submission in submissions:
                 time_before = datetime.datetime.now()
                 submission_obj = submission()
@@ -122,7 +122,7 @@ def run_submissions_for_contest(contest_path):
                 answer, author = _run_submission(submission_obj, input)
                 time_after = datetime.datetime.now()
                 msecs = (time_after - time_before).total_seconds() * 1000
-                print("{green}{author}{end}\t | {blue}{answer}{end} \t | {msecs} ms".format(
+                print("\t\t{green}{author}{end}\t | {blue}{answer}{end} \t | {msecs} ms".format(
                     green=bcolors.GREEN,
                     author=author.title(),
                     end=bcolors.ENDC,
@@ -142,8 +142,8 @@ def run_submissions_for_contest(contest_path):
 
 
 def run_submissions_for_day(day, day_path, contestFilter=None):
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(bcolors.RED + bcolors.BOLD + "running submissions for day %s:" % day +bcolors.ENDC)
+    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print(bcolors.RED + bcolors.BOLD + "Running submissions for day %s:" % day +bcolors.ENDC)
 
     contest_paths = _get_contests_path_for_day(day_path)
     for contest_path in contest_paths:
