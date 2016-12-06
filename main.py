@@ -7,6 +7,7 @@ from submission import Submission
 
 show_debug = False
 filter_author = None
+except_list = None
 
 #To print colors in terminal
 class bcolors:
@@ -142,17 +143,25 @@ def run_submissions_for_contest(contest_path):
 
 
 def run_submissions_for_day(day, day_path, contestFilter=None):
-    print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
-    print(bcolors.RED + bcolors.BOLD + "Running submissions for day %s:" % day +bcolors.ENDC)
-
+    firstRun = True
     contest_paths = _get_contests_path_for_day(day_path)
     for contest_path in contest_paths:
-        if contestFilter != None and _get_constest_number(contest_path) == contestFilter:
-            run_submissions_for_contest(contest_path)
-        elif contestFilter == None:
+        run = True
+        if contestFilter != None and _get_constest_number(contest_path) != contestFilter:
+            run = False
+
+        if except_list != None and day in except_list:
+            run = False
+
+        if run:
+            if firstRun: #To avoid printing header for excepted days
+                print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+                print(bcolors.RED + bcolors.BOLD + "Running submissions for day %s:" % day +bcolors.ENDC)
+                firstRun = False
+            
             run_submissions_for_contest(contest_path)
 
-    print("\n")
+            print("\n")
 
 def run_submissions():
     for day_path in _get_days():
@@ -163,11 +172,12 @@ def run_submissions():
 def main(argv):
     global show_debug
     global filter_author
+    global except_list
     day = None
     part = None
     smartDetection = False
     try:
-        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug", "author=", 'last'])
+        opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug", "author=", 'last', 'except='])
     except getopt.GetoptError:
         print 'main.py -d <day-number> -p <contest-number>'
         sys.exit(2)
@@ -188,6 +198,8 @@ def main(argv):
             show_debug = False
         elif opt in ["-a", "--author"]:
             filter_author = arg
+        elif opt in ["-e", "--except"]:
+            except_list = arg.split(',')
 
     if not (part is None) and day is None:
         for day_path in _get_days():
