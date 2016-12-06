@@ -169,12 +169,12 @@ def main(argv):
     try:
         opts, args = getopt.getopt(argv,"hd:p:",["day=","part=", "debug", "no-debug", "author=", 'last'])
     except getopt.GetoptError:
-        print 'main.py -d <day-number> -c <contest-number>'
+        print 'main.py -d <day-number> -p <contest-number>'
         sys.exit(2)
 
     for opt, arg in opts:
         if opt == '-h':
-            print 'main.py -d <day-number> -c <contest-number>'
+            print 'main.py -d <day-number> -p <contest-number>'
             sys.exit()
         elif opt in ("-d", "--day"):
             day = arg
