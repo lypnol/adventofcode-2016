@@ -9,7 +9,7 @@ class JulesSubmission(Submission):
         els = []
         for i in range(len(part)-2):
             el = part[i:i+3]
-            if el == el[::-1] and el[0] != el[1]:
+            if el[0] == el[-1] and el[0] != el[1]:
                 els.append(el)
         return els
 

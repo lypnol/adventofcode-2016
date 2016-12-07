@@ -8,7 +8,7 @@ class JulesSubmission(Submission):
     def hasPalindrome(self,part):
         for i in range(len(part)-3):
             el = part[i:i+4]
-            if el == el[::-1] and el[0] != el[1]:
+            if el[0] == el[-1] and el[1] == el[-2] and el[0] != el[1]:
                 return True
         return False
 
