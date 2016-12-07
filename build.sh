@@ -2,9 +2,8 @@
 # set -ev
 declare a CHANGED
 
-for f in `git --no-pager diff --raw master..${TRAVIS_COMMIT} | awk 'NF>1{print $NF}'`
+for DAY_DIRECTORY in `git --no-pager diff --name-only ${TRAVIS_COMMIT_RANGE} | cut -d "/" -f1`
 do
-    DAY_DIRECTORY=`echo "$f" | cut -d "/" -f1`;
     if [[ $DAY_DIRECTORY == day-* ]]; then
         DAY=$(echo $DAY_DIRECTORY | cut -d'-' -f 2)
         if [[ " ${CHANGED[*]} " == *" ${DAY} "* ]]; then
