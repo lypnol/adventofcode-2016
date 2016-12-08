@@ -12,15 +12,17 @@ class JulesSubmission(Submission):
         
         def shiftRow(table,a,b):
             import copy
-            newTable = copy.deepcopy(table)
+            newTable = list(table[a])
             for i in range(width):
-                table[a][i] = newTable[a][(i-b)%width]
+                table[a][i] = newTable[(i-b)%width]
 
         def shiftColumn(table,a,b):
             import copy
-            newTable = copy.deepcopy(table)
+            newTable = []
             for i in range(heigth):
-                table[i][a] = newTable[(i-b)%heigth][a]
+                newTable.append(table[i][a])
+            for i in range(heigth):
+                table[i][a] = newTable[(i-b)%heigth]
 
         def rect(table,a,b):
             for i in range(b):
