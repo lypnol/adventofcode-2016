@@ -36,7 +36,7 @@ class AyoubSubmission(Submission):
             for y in range(h):
                 screen[y][A] = col[y]
 
-        screen = [['.' for x in range(w)] for y in range(h)]
+        screen = [[' ' for x in range(w)] for y in range(h)]
         for line in s.split('\n'):
             tokens = line.split()
             command = tokens[0]
