@@ -95,6 +95,12 @@ class AyoubSubmission(Submission):
         s = s.rstrip()
         commands = s.split('\n')
 
+        bots = dict()
+        output = dict()
+        search = (17, 61)
+        found = -1
+        stop = False
+
         for command in commands:
             tokens = command.split()
 

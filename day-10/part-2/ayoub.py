@@ -79,6 +79,9 @@ class AyoubSubmission(Submission):
     def run(self, s):
         global bots, output
 
+        bots = dict()
+        output = dict()
+
         s = s.rstrip()
         commands = s.split('\n')
 
