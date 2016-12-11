@@ -36,7 +36,7 @@ def _context_name(context_path):
 # Return the list of the contests
 # It should be the list of the directories matching day-<a number>
 def _get_days():
-    return glob.glob(DAY_PATH_PATTERN)
+    return sorted(glob.glob(DAY_PATH_PATTERN), key=lambda x: abs(int(x[-2:])))
 
 # Return the list of the contests path for the given day path
 def _get_contests_path_for_day(day_path):
@@ -192,6 +192,7 @@ def main(argv):
             part = arg
         elif opt == '--last':
             day = _get_days()[-1][4:]
+            print day
         elif opt == '--debug':
             show_debug = True
         elif opt == '--no-debug':
