@@ -90,7 +90,7 @@ class AyoubSubmission(Submission):
         return 'Ayoub'
 
     def run(self, s):
-        global bots, output
+        global bots, output, search, found, stop
 
         s = s.rstrip()
         commands = s.split('\n')
