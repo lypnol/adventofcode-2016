@@ -8,9 +8,29 @@ class AyoubSubmission(Submission):
 
     def run(self, s):
         s = s.rstrip()
+
+        def find_pattern(i1, i2, i3):
+            '''
+            Look for patterns:
+                inc x
+                dec y
+                jnz y -2
+            which translate to:
+                x += y
+                y = 0
+            '''
+            t1 = i1.split()
+            t2 = i2.split()
+            t3 = i3.split()
+            if t1[0] == 'inc' and t2[0] == 'dec' and t3[0] == 'jnz' and\
+               t3[2] == '-2' and t3[1] == t2[1]:
+               return True
+            return False
+
         instructions = s.split('\n')
         reg = {'a': 0, 'b': 0, 'c': 1, 'd': 0}
         i = 0
+
         while i < len(instructions) :
             t = instructions[i].split()
             if t[0] == 'cpy':
@@ -19,7 +39,16 @@ class AyoubSubmission(Submission):
                 else:
                     reg[t[2]] = int(t[1])
             elif t[0] == 'inc':
-                reg[t[1]] += 1
+                if i < len(instructions) - 2 and find_pattern(*instructions[i:i+3]):
+                    t1 = instructions[i].split()
+                    t2 = instructions[i+1].split()
+                    t3 = instructions[i+2].split()
+                    reg[t1[1]] += reg[t2[1]]
+                    reg[t2[1]] = 0
+                    i += 3
+                    continue
+                else:
+                    reg[t[1]] += 1
             elif t[0] == 'dec':
                 reg[t[1]] -= 1
             elif t[0] == 'jnz':
