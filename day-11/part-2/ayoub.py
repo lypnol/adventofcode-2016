@@ -73,14 +73,13 @@ class AyoubSubmission(Submission):
                 return True
 
             @staticmethod
-            def check_safe(rows):
-                for elements in rows:
-                    M = [x[:-1] for x in elements if x[-1] == 'M']
-                    G = [x[:-1] for x in elements if x[-1] == 'G']
-                    if G:
-                        for m in M:
-                            if m not in G:
-                                return False
+            def check_safe(elements):
+                M = [x[:-1] for x in elements if x[-1] == 'M']
+                G = [x[:-1] for x in elements if x[-1] == 'G']
+                if G:
+                    for m in M:
+                        if m not in G:
+                            return False
                 return True
 
             @staticmethod
@@ -157,11 +156,8 @@ class AyoubSubmission(Submission):
                 for u in moves:
                     next_pos = self.pos + u
                     for comb in all_possible:
-                        if State.is_stupid_move(comb, u):
-                            continue
-
-                        if State.check_safe([[x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']]) and \
-                           State.check_safe([[x for x in self.floors[i] if x!=' '] + list(comb) for i in range(min(self.pos+1, next_pos+1), max(self.pos+1, next_pos+1), u//abs(u))]):
+                        if State.check_safe([x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']) and \
+                           State.check_safe([x for x in self.floors[next_pos] if x!=' '] + list(comb)):
                             floors = State.move(deepcopy(self.floors), self.pos, u, comb)
                             self.next.append((abs(u), newState(next_pos, floors)))
 
