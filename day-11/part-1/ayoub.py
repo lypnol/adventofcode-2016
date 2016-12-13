@@ -142,8 +142,10 @@ class AyoubSubmission(Submission):
                         all_possible.append(comb)
 
                 moves = []
-                if self.pos < 3: moves.extend([u for u in range(1, 4-self.pos)])
-                if self.pos > 0: moves.extend([-u for u in range(1, self.pos+1)])
+                #if self.pos < 3: moves.extend([u for u in range(1, 4-self.pos)])
+                #if self.pos > 0: moves.extend([-u for u in range(1, self.pos+1)])
+                if self.pos < 3: moves.append(1)
+                if self.pos > 0: moves.append(-1)
 
                 for u in moves:
                     next_pos = self.pos + u
