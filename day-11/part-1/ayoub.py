@@ -2,13 +2,15 @@ from submission import Submission
 from itertools import combinations
 from copy import deepcopy
 from time import sleep
-import heapq
+from heapq import *
 
 WIDTH = 15
-hashes = {}
+elements = {}
+states_cache = {}
 
 def gen_primes():
-    """ Generate an infinite sequence of prime numbers.
+    """
+    Generate an infinite sequence of prime numbers.
     """
     D = {}
     q = 2
@@ -21,76 +23,8 @@ def gen_primes():
                 D.setdefault(p + q, []).append(p)
             del D[q]
         q += 1
+primes_generator = gen_primes()
 
-def hash_state(pos, floors):
-    global hashes
-    h = [str(pos)]
-    for i in range(4):
-        floor_hash = 1
-        for j in range(WIDTH):
-            if floors[i][j] != '.':
-                floor_hash *= hashes[floors[i][j]]
-        h.append(str(floor_hash))
-    return ' '.join(h)
-
-def already_been_here(pos, floors, past):
-    return hash_state(pos, floors) in past
-
-def is_safe_move(chips, f):
-    if len(chips) == 0:
-        return True
-    for ch in f:
-        if ch != '.' and ch[-1] == 'G' \
-        and str(ch[:-1]+'M') not in f and str(ch[:-1]+'M') not in chips:
-            return False
-    return True
-
-def move(state, pos, u, comb):
-    for c in comb:
-        idx = state[pos].index(c)
-        for i in range(WIDTH):
-            if state[pos+u][i] == '.':
-                state[pos+u][i] = c
-                state[pos][idx] = '.'
-    return state
-
-def next_states(pos, floors, past):
-    states = []
-    current_components = [x for x in floors[pos] if x!='.']
-    all_possible = []
-
-    if len(current_components) >= 1:
-        for comb in current_components:
-            all_possible.append((comb,))
-    if len(current_components) >= 2:
-        for comb in combinations(current_components, 2):
-            all_possible.append(comb)
-    all_possible.append(tuple())
-
-    moves = []
-    if pos < 3: moves.extend([u for u in range(1, 4-pos)])
-    if pos > 0: moves.extend([-u for u in range(1, pos+1)])
-
-    for u in moves:
-        next_pos = pos + u
-        for comb in all_possible:
-            if is_safe_move(list(comb), floors[next_pos]):
-                new_state = move(deepcopy(floors), pos, u, comb)
-                if not already_been_here(next_pos, new_state, past):
-                    states.append((next_pos, new_state))
-
-    return states
-
-def is_done(floors):
-    for f in floors[:-1]:
-        for x in f:
-            if x != '.':
-                return False
-    return True
-
-def show(floors, pos):
-    print "\033[5;0f" + "\n".join([' '.join([' ' for _ in range(WIDTH+100)]) for i in range(10)])
-    print "\033[5;0f" + "\n".join([('.   ' if pos!=i else 'E   ' ) + ' '.join(floors[i]) for i in range(3, -1, -1)])
 
 class AyoubSubmission(Submission):
 
@@ -98,46 +32,185 @@ class AyoubSubmission(Submission):
         return 'Ayoub'
 
     def run(self, s):
-        s = s.rstrip()
-        global hashes
-        hashes = {}
-        primes_generator = gen_primes()
+        global elements, states_cache
 
-        floors = [['.' for _ in range(WIDTH)] for n in range(4)]
-        for i, line in enumerate(s.split('\n')[:-1]):
+        elements = {}
+        states_cache = {}
+
+
+        class State(object):
+
+            @staticmethod
+            def hash(pos, floors):
+                global elements
+                h = [str(pos)]
+                for i in range(4):
+                    floor_hash = 1
+                    for j in range(WIDTH):
+                        if floors[i][j] != ' ':
+                            floor_hash *= elements[floors[i][j]]
+                    h.append(str(floor_hash))
+                return hash(' '.join(h))
+
+            @staticmethod
+            def is_safe_move(elements, last, row):
+                if len(elements) == 0: return True
+                last = [x for x in last if x not in elements]
+                row.extend(elements)
+
+                for e in row:
+                    if e[-1] == 'M':
+                        for g in row:
+                            if g[-1] == 'G' and str(g[:-1] + 'M') not in row:
+                                return False
+
+                for e in last:
+                    if e[-1] == 'M':
+                        for g in last:
+                            if g[-1] == 'G' and str(g[:-1] + 'M') not in last:
+                                return False
+
+                return True
+
+            @staticmethod
+            def checkSafe(elements):
+                M = [x[:-1] for x in elements if x[-1] == 'M']
+                G = [x[:-1] for x in elements if x[-1] == 'G']
+                if G:
+                    for m in M:
+                        if m not in G:
+                            return False
+
+                return True
+
+            @staticmethod
+            def move(floors, pos, dist, elements):
+                for e in elements:
+                    idx = floors[pos].index(e)
+                    for i in range(WIDTH):
+                        if floors[pos+dist][i] == ' ':
+                            floors[pos+dist][i] = e
+                            floors[pos][idx] = ' '
+                            break
+                return floors
+
+
+            def __init__(self, pos, floors):
+                global primes_generator, states_cache
+                self.hash = State.hash(pos, floors)
+                self.pos = pos
+                self.floors = deepcopy(floors)
+                self.next = []
+                self.heur = None
+                self.parent = None
+                self.G = float('inf')
+
+            def __hash__(self):
+                return self.hash
+
+            def __eq__(self, o):
+                return isinstance(o, State) and o.hash == self.hash
+
+            def __str__(self):
+                return "\n".join(
+                    [('.   ' if self.pos!=i else 'E   ' ) +\
+                      ' '.join(self.floors[i]) for i in range(3, -1, -1) ])
+
+            def __repr__(self):
+                return self.__str__()
+
+
+            def next_states(self):
+                if self.next:
+                    return self.next
+
+                self.next = []
+                current_components = [x for x in self.floors[self.pos] if x!=' ']
+                all_possible = []
+
+                if len(current_components) >= 1:
+                    for comb in current_components:
+                        all_possible.append((comb,))
+                if len(current_components) >= 2:
+                    for comb in combinations(current_components, 2):
+                        all_possible.append(comb)
+                #all_possible.append(tuple())
+
+                moves = []
+                if pos < 3: moves.extend([u for u in range(1, 4-pos)])
+                if pos > 0: moves.extend([-u for u in range(1, pos+1)])
+
+                for u in moves:
+                    next_pos = self.pos + u
+                    for comb in all_possible:
+                        if State.checkSafe([x for x in self.floors[self.pos+i] if x not in list(comb) and x!=' ']) and \
+                           State.checkSafe([x for x in self.floors[next_pos] if x!=' '] + list(comb)):
+                            floors = State.move(deepcopy(self.floors), self.pos, u, comb)
+                            self.next.append((abs(u), newState(next_pos, floors)))
+
+                return self.next
+
+            def heuristic(self):
+                if self.heur is not None:
+                    return self.heur
+                val = 0
+                for i in range(3):
+                    for j in range(WIDTH):
+                        if self.floors[i][j] != ' ':
+                            val += 3 - i
+                self.heur = val
+                return self.heur
+
+        def newState(pos, floors):
+            global states_cache
+            h = State.hash(pos, floors)
+            if h in states_cache:
+                return states_cache[h]
+            else:
+                states_cache[h] = State(pos, floors)
+            return states_cache[h]
+
+
+        def display(state):
+            print "\033[0;0f" + "\n".join([' '.join([' ' for _ in range(500)]) for i in range(20)])
+            print "\033[0;0f" + str(state)
+
+
+        floors = [[' ' for _ in range(WIDTH)] for n in range(4)]
+        for i, line in enumerate(s.rstrip().split('\n')[:-1]):
             line = line.replace(', and a ', ' a ', 5)
             line = line.replace(' and a ', ' a ', 5)
             line = line.replace(', a ', ' a ', 5)
+            line = line.replace('.', '', 5)
             for j, component in enumerate(line.split(' a ')[1:]):
                 tokens = component.split()
                 if tokens[1] == 'generator':
                     floors[i][j] = tokens[0] + 'G'
                 else:
                     floors[i][j] = tokens[0].split('-')[0] + 'M'
-                if floors[i][j] not in hashes:
-                    hashes[floors[i][j]] = primes_generator.next()
+                if floors[i][j] not in elements:
+                    elements[floors[i][j]] = primes_generator.next()
 
-        pos = 0
+        start = newState(0, floors)
+        start.G = 0
+        openset = [(start.G + start.heuristic(), start)]
+        closedset = set()
 
-        dist = dict()
-        dist[hash_state(0, deepcopy(floors))] = 0
-        past = []
-        Q = [(0, (0, deepcopy(floors)))]
-        while Q:
-            _, (pos, state) = heapq.heappop(Q)
-            if is_done(state):
-                return dist[hash_state(pos, state)]
-            past.append(hash_state(pos, state))
-            for next_pos, next_state in next_states(pos, state, past):
-                d = abs(next_pos - pos)
-                if hash_state(next_pos, next_state) not in dist or \
-                   dist[hash_state(next_pos, next_state)] > dist[hash_state(pos, state)] + d:
-                    dist[hash_state(next_pos, next_state)] = dist[hash_state(pos, state)] + d
-                    for i, (_, (p, s)) in enumerate(Q):
-                        if hash_state(p, s) == hash_state(next_pos, next_state):
-                            Q.pop(i)
-                            heapq.heapify(Q)
+        while openset:
+            _, current = heappop(openset)
+            if current.heuristic() == 0:
+                return current.G
+            closedset.add(current)
+            for cost, state in current.next_states():
+                if state in closedset:
+                    continue
+                if state.G > current.G + cost:
+                    state.parent = current
+                    state.G = current.G + cost
+                    for i, (_, s) in enumerate(openset):
+                        if hash(s) == hash(state):
+                            openset.pop(i)
+                            heapify(openset)
                             break
-                    heapq.heappush(Q, (dist[hash_state(next_pos, next_state)], (next_pos, next_state)))
-
+                    heappush(openset, (state.G + state.heuristic(), state))
         return None
