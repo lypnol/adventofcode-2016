@@ -73,15 +73,19 @@ class AyoubSubmission(Submission):
                 return True
 
             @staticmethod
-            def checkSafe(elements):
-                M = [x[:-1] for x in elements if x[-1] == 'M']
-                G = [x[:-1] for x in elements if x[-1] == 'G']
-                if G:
-                    for m in M:
-                        if m not in G:
-                            return False
-
+            def check_safe(rows):
+                for elements in rows:
+                    M = [x[:-1] for x in elements if x[-1] == 'M']
+                    G = [x[:-1] for x in elements if x[-1] == 'G']
+                    if G:
+                        for m in M:
+                            if m not in G:
+                                return False
                 return True
+
+            @staticmethod
+            def is_stupid_move(comb, u):
+                return False
 
             @staticmethod
             def move(floors, pos, dist, elements):
@@ -128,23 +132,27 @@ class AyoubSubmission(Submission):
                 current_components = [x for x in self.floors[self.pos] if x!=' ']
                 all_possible = []
 
+                if len(current_components) == 0:
+                    return []
                 if len(current_components) >= 1:
                     for comb in current_components:
                         all_possible.append((comb,))
                 if len(current_components) >= 2:
                     for comb in combinations(current_components, 2):
                         all_possible.append(comb)
-                #all_possible.append(tuple())
 
                 moves = []
-                if pos < 3: moves.extend([u for u in range(1, 4-pos)])
-                if pos > 0: moves.extend([-u for u in range(1, pos+1)])
+                if self.pos < 3: moves.extend([u for u in range(1, 4-self.pos)])
+                if self.pos > 0: moves.extend([-u for u in range(1, self.pos+1)])
 
                 for u in moves:
                     next_pos = self.pos + u
                     for comb in all_possible:
-                        if State.checkSafe([x for x in self.floors[self.pos+i] if x not in list(comb) and x!=' ']) and \
-                           State.checkSafe([x for x in self.floors[next_pos] if x!=' '] + list(comb)):
+                        if State.is_stupid_move(comb, u):
+                            continue
+
+                        if State.check_safe([[x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']]) and \
+                           State.check_safe([[x for x in self.floors[i] if x!=' '] + list(comb) for i in range(min(self.pos+1, next_pos+1), max(self.pos+1, next_pos+1), u//abs(u))]):
                             floors = State.move(deepcopy(self.floors), self.pos, u, comb)
                             self.next.append((abs(u), newState(next_pos, floors)))
 
@@ -198,6 +206,7 @@ class AyoubSubmission(Submission):
 
         while openset:
             _, current = heappop(openset)
+            #display(current)
             if current.heuristic() == 0:
                 return current.G
             closedset.add(current)
