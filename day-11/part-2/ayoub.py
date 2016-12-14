@@ -84,13 +84,6 @@ class AyoubSubmission(Submission):
 
             @staticmethod
             def is_stupid_move(comb, u):
-                if len(comb) == 2:
-                    if u < 0 and comb[0][:-1] == comb[1][:-1] and comb[0][-1] != comb[1][-1]:
-                        return True
-                    if comb[0][-1] == comb[1][-1] and comb[0][-1] == 'G':
-                        return True
-                elif len(comb) == 1 and comb[0][-1] == 'G':
-                    return True
                 return False
 
             @staticmethod
@@ -156,6 +149,9 @@ class AyoubSubmission(Submission):
                 for u in moves:
                     next_pos = self.pos + u
                     for comb in all_possible:
+                        if State.is_stupid_move(comb, u):
+                            continue
+
                         if State.check_safe([x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']) and \
                            State.check_safe([x for x in self.floors[next_pos] if x!=' '] + list(comb)):
                             floors = State.move(deepcopy(self.floors), self.pos, u, comb)
@@ -169,8 +165,15 @@ class AyoubSubmission(Submission):
                 val = 0
                 for i in range(3):
                     for j in range(WIDTH):
-                        if self.floors[i][j] != ' ':
-                            val += 3 - i
+                        if self.floors[i][j][-1] == 'M':
+                            val += 3 - i + abs(self.pos - i)
+                        if self.floors[i][j][-1] == 'G':
+                            for k in range(4):
+                                if str(self.floors[i][j][:-1]+'M') in self.floors[k]:
+                                    if i >= k:
+                                        val += 3 - i + abs(self.pos - k) + abs(i - k)
+                                    else:
+                                        val += 3 - k + abs(self.pos - k) + 2 * abs(i - k)
                 self.heur = val
                 return self.heur
 

@@ -73,14 +73,13 @@ class AyoubSubmission(Submission):
                 return True
 
             @staticmethod
-            def check_safe(rows):
-                for elements in rows:
-                    M = [x[:-1] for x in elements if x[-1] == 'M']
-                    G = [x[:-1] for x in elements if x[-1] == 'G']
-                    if G:
-                        for m in M:
-                            if m not in G:
-                                return False
+            def check_safe(elements):
+                M = [x[:-1] for x in elements if x[-1] == 'M']
+                G = [x[:-1] for x in elements if x[-1] == 'G']
+                if G:
+                    for m in M:
+                        if m not in G:
+                            return False
                 return True
 
             @staticmethod
@@ -153,8 +152,8 @@ class AyoubSubmission(Submission):
                         if State.is_stupid_move(comb, u):
                             continue
 
-                        if State.check_safe([[x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']]) and \
-                           State.check_safe([[x for x in self.floors[i] if x!=' '] + list(comb) for i in range(min(self.pos+1, next_pos+1), max(self.pos+1, next_pos+1), u//abs(u))]):
+                        if State.check_safe([x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']) and \
+                           State.check_safe([x for x in self.floors[next_pos] if x!=' '] + list(comb)):
                             floors = State.move(deepcopy(self.floors), self.pos, u, comb)
                             self.next.append((abs(u), newState(next_pos, floors)))
 
@@ -166,8 +165,15 @@ class AyoubSubmission(Submission):
                 val = 0
                 for i in range(3):
                     for j in range(WIDTH):
-                        if self.floors[i][j] != ' ':
-                            val += 3 - i
+                        if self.floors[i][j][-1] == 'M':
+                            val += 3 - i + abs(self.pos - i)
+                        if self.floors[i][j][-1] == 'G':
+                            for k in range(4):
+                                if str(self.floors[i][j][:-1]+'M') in self.floors[k]:
+                                    if i >= k:
+                                        val += 3 - i + abs(self.pos - k) + abs(i - k)
+                                    else:
+                                        val += 3 - k + abs(self.pos - k) + 2 * abs(i - k)
                 self.heur = val
                 return self.heur
 
@@ -208,8 +214,20 @@ class AyoubSubmission(Submission):
 
         while openset:
             _, current = heappop(openset)
-            #display(current)
             if current.heuristic() == 0:
+                path = []
+                n = current
+                while n is not None:
+                    path.insert(0, n)
+                    n = n.parent
+                c = 0
+                for n in path:
+                    display(n)
+                    print
+                    print "total: "+str(n.G)
+                    try:
+                        raw_input()
+                    except: pass
                 return current.G
             closedset.add(current)
             for cost, state in current.next_states():
