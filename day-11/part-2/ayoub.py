@@ -5,26 +5,7 @@ from time import sleep
 from heapq import *
 
 WIDTH = 15
-elements = {}
 states_cache = {}
-
-def gen_primes():
-    """
-    Generate an infinite sequence of prime numbers.
-    """
-    D = {}
-    q = 2
-    while True:
-        if q not in D:
-            yield q
-            D[q * q] = [q]
-        else:
-            for p in D[q]:
-                D.setdefault(p + q, []).append(p)
-            del D[q]
-        q += 1
-primes_generator = gen_primes()
-
 
 class AyoubSubmission(Submission):
 
@@ -32,11 +13,9 @@ class AyoubSubmission(Submission):
         return 'Ayoub'
 
     def run(self, s):
-        global elements, states_cache
+        global states_cache
 
-        elements = {}
         states_cache = {}
-
 
         class State(object):
 
@@ -135,7 +114,6 @@ class AyoubSubmission(Submission):
 
 
             def __init__(self, pos, floors):
-                global primes_generator, states_cache
                 self.hash = State.hash(pos, floors)
                 self.pos = pos
                 self.floors = deepcopy(floors)
@@ -272,8 +250,6 @@ class AyoubSubmission(Submission):
                     floors[i][j] = tokens[0] + 'G'
                 else:
                     floors[i][j] = tokens[0].split('-')[0] + 'M'
-                if floors[i][j] not in elements:
-                    elements[floors[i][j]] = primes_generator.next()
 
         start = newState(0, floors)
         start.G = 0
