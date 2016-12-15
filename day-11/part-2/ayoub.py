@@ -42,15 +42,51 @@ class AyoubSubmission(Submission):
 
             @staticmethod
             def hash(pos, floors):
-                global elements
-                h = [str(pos)]
+                # remove empty spaces
+                floors = [[x for x in r if x != ' '] for r in floors]
+
+                '''
+                for one pair there is 16 different state states
+                for each of those 16 states count how many pairs match it
+                the hash is the combination of these counts and the position of the elevator
+                '''
+                count = [0 for i in range(16)]
+
+                # state i=0..3: both elements of pair are on ith floor
                 for i in range(4):
-                    floor_hash = 1
-                    for j in range(WIDTH):
-                        if floors[i][j] != ' ':
-                            floor_hash *= elements[floors[i][j]]
-                    h.append(str(floor_hash))
-                return hash(' '.join(h))
+                    for x in floors[i]:
+                        if x[:-1]+'M' in floors[i] and x[:-1]+'G' in floors[i]:
+                             count[i] += 0.5
+                # state i=4..6: generator is one floor above mc
+                for i in range(3):
+                    for x in floors[i]:
+                        if x[-1] == 'M' and x[:-1]+'G' in floors[i+1]:
+                            count[4+i] += 1
+                # state i=7..9: generator is one floor below mc
+                for i in range(3):
+                    for x in floors[i]:
+                        if x[-1] == 'G' and x[:-1]+'M' in floors[i+1]:
+                            count[7+i] += 1
+                # state i=10..11: generator is two floors above mc
+                for i in range(2):
+                    for x in floors[i]:
+                        if x[-1] == 'M' and x[:-1]+'G' in floors[i+2]:
+                            count[10+i] += 1
+                # state i=12..13: generator is two floors below mc
+                for i in range(2):
+                    for x in floors[i]:
+                        if x[-1] == 'G' and x[:-1]+'M' in floors[i+2]:
+                            count[12+i] += 1
+                # state i=14: generator is three floors above mc
+                for x in floors[0]:
+                    if x[-1] == 'M' and x[:-1]+'G' in floors[3]:
+                        count[14] += 1
+                # state i=15: generator is three floors below mc
+                for x in floors[0]:
+                    if x[-1] == 'G' and x[:-1]+'M' in floors[3]:
+                        count[15] += 1
+
+                return hash(' '.join(map(str,count))+' '+str(pos))
 
             @staticmethod
             def is_safe_move(elements, last, row):
@@ -123,6 +159,11 @@ class AyoubSubmission(Submission):
                 return self.__str__()
 
 
+            def is_stupid_move(self, comb, u):
+                if u < 0 and len([x for x in self.floors[self.pos+u] if x!=' ']) == 0:
+                    return True
+                return False
+
             def next_states(self):
                 if self.next:
                     return self.next
@@ -141,22 +182,46 @@ class AyoubSubmission(Submission):
                         all_possible.append(comb)
 
                 moves = []
-                #if self.pos < 3: moves.extend([u for u in range(1, 4-self.pos)])
-                #if self.pos > 0: moves.extend([-u for u in range(1, self.pos+1)])
-                if self.pos < 3: moves.append(1)
                 if self.pos > 0: moves.append(-1)
+                if self.pos < 3: moves.append(1)
 
                 for u in moves:
+                    moved_2_up = False
+                    moved_1_down = False
+                    moved_up = []
                     next_pos = self.pos + u
+                    if u > 0:
+                        all_possible = all_possible[::-1]
                     for comb in all_possible:
-                        if State.is_stupid_move(comb, u):
+                        if self.is_stupid_move(comb, u):
                             continue
 
                         if State.check_safe([x for x in self.floors[self.pos] if x not in list(comb) and x!=' ']) and \
                            State.check_safe([x for x in self.floors[next_pos] if x!=' '] + list(comb)):
                             floors = State.move(deepcopy(self.floors), self.pos, u, comb)
-                            self.next.append((abs(u), newState(next_pos, floors)))
-
+                            state = newState(next_pos, floors)
+                            if u > 0:
+                                if moved_2_up and len(comb) < 2:
+                                    break
+                                else:
+                                    if len(comb) == 2: moved_2_up = True
+                                    elif len(comb) == 1:
+                                        dont = False
+                                        if comb[0][-1] == 'M' and str(comb[0][:-1]+'G') in self.floors[self.pos]:
+                                            for other in moved_up:
+                                                if other[0][-1] == 'M' and str(other[0][:-1]+'G') in self.floors[self.pos]:
+                                                    dont = True
+                                                    break
+                                        if dont:
+                                            continue
+                                        moved_up.append(comb[0])
+                                    self.next.append((abs(u),state))
+                            else:
+                                if moved_1_down and len(comb) > 1:
+                                    break
+                                else:
+                                    self.next.append((abs(u),state))
+                                    if len(comb) == 1: moved_1_down = True
                 return self.next
 
             def heuristic(self):
@@ -176,6 +241,7 @@ class AyoubSubmission(Submission):
                                         val += 3 - k + abs(self.pos - k) + 2 * abs(i - k)
                 self.heur = val
                 return self.heur
+
 
         def newState(pos, floors):
             global states_cache
@@ -216,6 +282,7 @@ class AyoubSubmission(Submission):
 
         while openset:
             _, current = heappop(openset)
+            #display(current)
             if current.heuristic() == 0:
                 return current.G
             closedset.add(current)
