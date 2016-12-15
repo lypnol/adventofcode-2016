@@ -24,11 +24,7 @@ class bcolors:
 DAY_PATH_PATTERN  = 'day-[0-9]*'
 CONTEST_PATH_PATTERN = 'part-[0-9]*'
 
-class DifferentAnswersException(Exception):
-    def __init__(self, value):
-        self.value = value
-    def __str__(self):
-        return repr(self.value)
+class DifferentAnswersException(Exception): pass
 
 def _context_name(context_path):
     return context_path.replace('/','_').replace('-','_')
@@ -134,7 +130,7 @@ def run_submissions_for_contest(contest_path):
                     msecs=msecs))
 
                 if prev_ans != None and prev_ans != str(answer):
-                    raise DifferentAnswersException("\t\twe don't agree for %s" % contest_path)
+                    raise DifferentAnswersException("\t\twe don't agree for {}".format(contest_path))
 
                 prev_ans = str(answer)
     except DifferentAnswersException as e:
@@ -158,7 +154,7 @@ def run_submissions_for_day(day, day_path, contestFilter=None):
                 print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                 print(bcolors.RED + bcolors.BOLD + "Running submissions for day %s:" % day +bcolors.ENDC)
                 firstRun = False
-            
+
             run_submissions_for_contest(contest_path)
 
             print("\n")
