@@ -1,5 +1,6 @@
 from submission import Submission
-import md5
+import hashlib
+import string
 
 
 class AyoubSubmission(Submission):
@@ -14,46 +15,47 @@ class AyoubSubmission(Submission):
 
         def has_five(s):
             fives = set()
-            for i in range(len(s)-4):
-                if s[i] == s[i+1] and s[i] == s[i+2] \
-                and s[i] == s[i+3] and s[i] == s[i+4]:
-                    fives.add(s[i])
+            for c in string.digits+"abcdef":
+                if c*5 in s:
+                    fives.add(c)
             return fives
 
         def has_triple(s):
-            for i in range(len(s)-2):
-                if s[i] == s[i+1] and s[i] == s[i+2]:
+            for i in range(len(s) - 2):
+                if s[i] == s[i+1] and s[i+2] == s[i]:
                     return s[i]
-            return None
+            return ' '
+
+        hashes_with_fives = []
+        for i in range(1, 1001):
+            h = hashlib.md5(salt + str(i)).hexdigest()
+            fives = has_five(h)
+            if fives: hashes_with_fives.append((i, fives))
 
         i = 0
-        looking_for = []
-        found = 0
+        keys = 0
         while True:
-            to_delete = []
-            for j, (idx, x) in enumerate(looking_for):
-                if i - idx >= 1000:
-                    to_delete.append(j)
-            for j in to_delete[::-1]:
-                del looking_for[j]
+            h = hashlib.md5(salt + str(i)).hexdigest()
+            if has_triple(h) != ' ':
+                is_key = False
+                for idx, l in hashes_with_fives:
+                    for c in l:
+                        if c == has_triple(h):
+                            keys += 1
+                            if keys == N:
+                                return i
+                            is_key = True
+                            break
+                    if is_key: break
 
-            Hash = md5.new(salt + str(i)).hexdigest()
-            fives = has_five(Hash)
-            for f in fives:
-                to_delete = []
-                for j, (idx, t) in enumerate(looking_for):
-                    if i - idx < 1000 and t == f:
-                        to_delete.append(j)
-                        found += 1
-                        if found == N:
-                            return idx
-                for j in to_delete[::-1]:
-                    del looking_for[j]
+            to_remove = []
+            for j, (idx, _) in enumerate(hashes_with_fives):
+                if idx <= i+1:
+                    to_remove.append(j)
+            for j in to_remove[::-1]:
+                del hashes_with_fives[j]
 
-            t = has_triple(Hash)
-            if t is not None:
-                looking_for.append((i, t))
+            fives = has_five(hashlib.md5(salt + str(i+1+1000)).hexdigest())
+            if fives: hashes_with_fives.append((i+1+1000, fives))
 
             i += 1
-
-        return
