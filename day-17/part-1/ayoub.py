@@ -1,5 +1,4 @@
 from submission import Submission
-from heapq import *
 import hashlib
 
 
