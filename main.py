@@ -188,7 +188,6 @@ def main(argv):
             part = arg
         elif opt == '--last':
             day = _get_days()[-1][4:]
-            print day
         elif opt == '--debug':
             show_debug = True
         elif opt == '--no-debug':
