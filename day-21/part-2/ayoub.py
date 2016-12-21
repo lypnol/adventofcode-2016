@@ -1,17 +1,14 @@
 from submission import Submission
-from collections import defaultdict
 
 
 class AyoubSubmission(Submission):
-    d = set()
 
     def author(self):
         return 'Ayoub'
 
     def run(self, s):
-        s = s.rstrip().split('\n')
+        s = s.rstrip()
         a = list("fbgdceah")
-        c = list("bdfhgeca")
 
         def swap(a, i, j):
             t = a[i]
@@ -26,6 +23,12 @@ class AyoubSubmission(Submission):
                 b += a[j]
             return list(b)
 
+        def reverse_rotate_l(a, x):
+            p = a.index(x)
+            r = [7, 0, 4, 1, 5, 2, 6, 3]
+            q = r[p]
+            return rotate(a, (p - q) % len(a))
+
         def reverse(a, i, j):
             l1 = a[:i]
             l2 = a[j+1:]
@@ -37,42 +40,20 @@ class AyoubSubmission(Submission):
             a.insert(j, e)
             return a
 
-        def explore(a, c, i):
-            if i == -1:
-                if ''.join(c) == 'abcdefgh':
-                    self.d.add(''.join(a))
-                    print self.d
-                return
-
-            line = s[i]
+        for line in s.split('\n')[::-1]:
             tokens = line.split()
             if tokens[0] == "swap":
                 if tokens[1] == "position":
-                    a = swap(list(a), int(tokens[5]), int(tokens[2]))
-                    c = swap(list(c), int(tokens[5]), int(tokens[2]))
+                    a = swap(a, int(tokens[2]), int(tokens[5]))
                 elif tokens[1] == "letter":
-                    a = swap(list(a), a.index(tokens[5]), a.index(tokens[2]))
-                    c = swap(list(c), c.index(tokens[5]), c.index(tokens[2]))
+                    a = swap(a, a.index(tokens[2]), a.index(tokens[5]))
             elif tokens[0] == "rotate":
                 if tokens[1] in ["left", "right"]:
-                    a = rotate(list(a), -int(tokens[2]) if tokens[1] == "left" else int(tokens[2]))
-                    c = rotate(list(c), -int(tokens[2]) if tokens[1] == "left" else int(tokens[2]))
+                    a = rotate(a, -int(tokens[2]) if tokens[1] == "left" else int(tokens[2]))
                 else:
-                    for x in range(8):
-                        a = list(rotate(list(a), x))
-                        c = list(rotate(list(c), x))
-                        explore(a, c, i-1)
-                    return
+                    a = reverse_rotate_l(a, tokens[6])
             elif tokens[0] == "reverse":
-                a = reverse(list(a), int(tokens[2]), int(tokens[4]))
-                c = reverse(list(c), int(tokens[2]), int(tokens[4]))
+                a = reverse(a, int(tokens[2]), int(tokens[4]))
             elif tokens[0] == "move":
-                x, y =  int(tokens[2]), int(tokens[5])
-                a = move(list(a), )
-                c = move(list(c), )
-
-            explore(list(a), list(c), i-1)
-
-        explore(a, c, len(s)-1)
-
-        return self.d
+                a = move(a, int(tokens[5]), int(tokens[2]))
+        return ''.join(a)

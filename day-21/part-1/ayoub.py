@@ -8,7 +8,7 @@ class AyoubSubmission(Submission):
 
     def run(self, s):
         s = s.rstrip()
-        a = list("ehdabfcg")
+        a = list("abcdefgh")
 
         def swap(a, i, j):
             t = a[i]
@@ -22,6 +22,13 @@ class AyoubSubmission(Submission):
                 j = (i + p) % len(a)
                 b += a[j]
             return list(b)
+
+        def rotate_l(a, x):
+            p = a.index(x)
+            if p >= 4:
+                p += 1
+            p += 1
+            return rotate(a, -p)
 
         def reverse(a, i, j):
             l1 = a[:i]
@@ -45,11 +52,7 @@ class AyoubSubmission(Submission):
                 if tokens[1] in ["left", "right"]:
                     a = rotate(a, int(tokens[2]) if tokens[1] == "left" else -int(tokens[2]))
                 else:
-                    p = a.index(tokens[6])
-                    if p >= 4:
-                        p += 1
-                    p += 1
-                    a = rotate(a, -p)
+                    a = rotate_l(a, tokens[6])
             elif tokens[0] == "reverse":
                 a = reverse(a, int(tokens[2]), int(tokens[4]))
             elif tokens[0] == "move":
