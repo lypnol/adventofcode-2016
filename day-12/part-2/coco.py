@@ -2,12 +2,13 @@ from submission import Submission
 
 class CocoDay12Part1(Submission):
 
-    register = {'a':0, 'b':0, 'c':1, 'd':0}
+
 
     def author(self):
         return "coco"
 
     def run(self, instructions):
+        self.register =  {'a':0, 'b':0, 'c':1, 'd':0}
         lines =  instructions.strip().split("\n")
         i = 0
         while i < len(lines):
