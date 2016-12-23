@@ -33,4 +33,3 @@ class JulesSubmission(Submission):
             steps += 1
             if (31,39) in visited:
                 return steps
-
