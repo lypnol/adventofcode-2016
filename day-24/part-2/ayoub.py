@@ -9,12 +9,6 @@ class AyoubSubmission(Submission):
         return 'Ayoub'
 
     def run(self, s):
-        """###########
-#0.1.....2#
-#.#######.#
-#4.......3#
-###########
-"""
         s = s.rstrip()
         g = []
         for line in s.split('\n'):
