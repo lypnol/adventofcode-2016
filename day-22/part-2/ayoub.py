@@ -38,6 +38,7 @@ Filesystem            Size  Used  Avail  Use%
             def __init__(self, m, pos, empty=None):
                 self.m = deepcopy(m)
                 self.pos = pos
+                self.parent = None
                 self._h = None
                 self.G = float("inf")
                 self.e = empty
@@ -77,11 +78,6 @@ Filesystem            Size  Used  Avail  Use%
                 for u, v in moves:
                     x, y = e
                     i, j = x + u, y + v
-                    useful = True
-                    if u > 0 and pos[0] - e[0] < 0:
-                        if pos[1] == e[1]:
-                            if m[x][y][1] >= m[x][y][0]
-
                     if i >= 0 and i < len(m) and j >= 0 and j < len(m[i])\
                     and m[x][y][1] >= m[i][j][0]:
                         c = deepcopy(m)
@@ -97,6 +93,24 @@ Filesystem            Size  Used  Avail  Use%
 
             def heuristic(self):
                 d = abs(self.pos[0]) + abs(self.pos[1])
+                de = (self.pos[0] - self.e[0]), (self.pos[1] - self.e[1])
+                de_r = (self.pos[0] - self.e[0]), (self.pos[1] - self.e[1] - 1)
+                de_u = (self.pos[0] - self.e[0]), (self.pos[1] - self.e[1])
+                if de[0] == 0:
+                    if de[1] < 0:
+                        d += abs(de[1]) + 3
+                    elif de[1] > 1:
+                        d += de[1] - 1
+                elif de[0] > 0:
+                    d += de[0] - 1 + abs(de[1])
+                elif de[0] < 0:
+                    if de[1] > 0:
+                        d += abs(de[0]) + de[1] - 1
+                    elif de[1] < 0:
+                        d += abs(de[0]) + 1 + abs(de[1])
+                    elif de[1] == 0:
+                        d += abs(de[0]) + 1
+
                 return d
 
         def display(state):
@@ -127,7 +141,7 @@ Filesystem            Size  Used  Avail  Use%
 
         while openset:
             _, current = heappop(openset)
-            if current.heuristic() == 0:
+            if current.pos == (0, 0):
                 return current.G
             closedset.add(current)
             for n in current.next_states():
@@ -139,5 +153,6 @@ Filesystem            Size  Used  Avail  Use%
                             heapify(openset)
                             break
                     heappush(openset, (n.G + n.heuristic(), n))
+                    n.parent = current
 
         return None
