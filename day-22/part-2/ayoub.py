@@ -10,30 +10,13 @@ class AyoubSubmission(Submission):
         return 'Ayoub'
 
     def run(self, s):
-
-        """
-Filesystem            Size  Used  Avail  Use%
-/dev/grid/node-x0-y0   10T    8T     2T   80%
-/dev/grid/node-x0-y1   11T    6T     5T   54%
-/dev/grid/node-x0-y2   32T   28T     4T   87%
-/dev/grid/node-x1-y0    9T    7T     2T   77%
-/dev/grid/node-x1-y1    8T    0T     8T    0%
-/dev/grid/node-x1-y2   11T    7T     4T   63%
-/dev/grid/node-x2-y0   10T    6T     4T   60%
-/dev/grid/node-x2-y1    9T    8T     1T   88%
-/dev/grid/node-x2-y2    9T    6T     3T   66%
-"""
         s = s.rstrip().split('\n')[2:]
 
         class State(object):
 
             @staticmethod
-            def hash(m, pos):
-                s = []
-                for i in range(len(m)):
-                    s.append(' '.join(map(str, m[i])))
-
-                return hash(' '.join(s) + ' ' +str(pos))
+            def hash(m, pos, e):
+                return hash(' '.join([str(e), str(pos)]))
 
             def __init__(self, m, pos, empty=None):
                 self.m = deepcopy(m)
@@ -54,16 +37,25 @@ Filesystem            Size  Used  Avail  Use%
             def __hash__(self):
                 if self._h is not None:
                     return self._h
-                self._h = State.hash(self.m, self.pos)
+                self._h = State.hash(self.m, self.pos, self.e)
                 return self._h
 
             def __eq__(self, o):
                 return isinstance(o, State) and hash(o) == self.__hash__()
 
             def __str__(self):
-                m = self.m
-                return '\n'.join([' '.join(map(str, m[i])) for i in range(len(m))])+\
-                       '\n' + str(self.pos)
+                m = deepcopy(self.m)
+                for i in range(len(m)):
+                    for j in range(len(m[i])):
+                        if (i,j) == self.pos:
+                            m[i][j] = 'G'
+                        elif (i,j) == self.e:
+                            m[i][j] = '_'
+                        elif m[i][j][0] > 100:
+                            m[i][j] = '#'
+                        else:
+                            m[i][j] = '.'
+                return '\n'.join([' '.join(map(str, m[i])) for i in range(len(m))])
 
             def __repr__(self):
                 return self.__str__()
@@ -76,7 +68,7 @@ Filesystem            Size  Used  Avail  Use%
 
                 moves = [(0, 1), (1, 0), (-1, 0), (0, -1)]
                 for u, v in moves:
-                    x, y = e
+                    x, y = e  # empty spot
                     i, j = x + u, y + v
                     if i >= 0 and i < len(m) and j >= 0 and j < len(m[i])\
                     and m[x][y][1] >= m[i][j][0]:
@@ -92,37 +84,20 @@ Filesystem            Size  Used  Avail  Use%
                 return n
 
             def heuristic(self):
-                d = abs(self.pos[0]) + abs(self.pos[1])
-                de = (self.pos[0] - self.e[0]), (self.pos[1] - self.e[1])
-                de_r = (self.pos[0] - self.e[0]), (self.pos[1] - self.e[1] - 1)
-                de_u = (self.pos[0] - self.e[0]), (self.pos[1] - self.e[1])
-                if de[0] == 0:
-                    if de[1] < 0:
-                        d += abs(de[1]) + 3
-                    elif de[1] > 1:
-                        d += de[1] - 1
-                elif de[0] > 0:
-                    d += de[0] - 1 + abs(de[1])
-                elif de[0] < 0:
-                    if de[1] > 0:
-                        d += abs(de[0]) + de[1] - 1
-                    elif de[1] < 0:
-                        d += abs(de[0]) + 1 + abs(de[1])
-                    elif de[1] == 0:
-                        d += abs(de[0]) + 1
-
-                return d
+                de = (self.pos[0] - self.e[0] - 1), (self.pos[1] - self.e[1])
+                return (de[0]**2 + de[1]**2)**0.5
 
         def display(state):
             print "\033[0;0f" + "\n".join([' '.join([' ' for _ in range(500)]) for i in range(20)])
             print "\033[0;0f" + str(state)
 
         def new_state(m, p, e=None):
-            h = State.hash(m, p)
+            h = State.hash(m, p, e)
             if h in self.states:
                 return self.states[h]
-            self.states[h] = State(m, p, e)
-            return self.states[h]
+            s = State(m, p, e)
+            self.states[hash(s)] = s
+            return s
 
         m = []
         i = -1
@@ -141,11 +116,13 @@ Filesystem            Size  Used  Avail  Use%
 
         while openset:
             _, current = heappop(openset)
+            if current.e[0] == current.pos[0]-1 and current.e[1] == current.pos[1]:
+                return current.G + (len(current.m)-2)*5 + 1
             if current.pos == (0, 0):
                 return current.G
-            closedset.add(current)
+            closedset.add(hash(current))
             for n in current.next_states():
-                if n.G > current.G + 1 and n not in closedset:
+                if n.G > current.G + 1 and hash(n) not in closedset:
                     n.G = current.G + 1
                     for i, (_, s) in enumerate(openset):
                         if hash(s) == hash(n):
